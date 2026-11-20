@@ -1,4 +1,5 @@
-from typing import Dict, Sequence 
+from collections import Counter
+from typing import Any, Dict, List, Sequence
 
 def _ensure_not_empty(data: Sequence[float]) -> None: 
     if not data: 
@@ -23,14 +24,23 @@ def spread(data: Sequence[float]) -> float:
     _ensure_not_empty(data) 
     return float(max(data) - min(data)) 
 
-def summarize(data: Sequence[float]) -> Dict[str, float]: 
-    """Сводный отчёт: count, mean, median, spread, min, max.""" 
-    _ensure_not_empty(data) 
-    return { 
-    "count": len(data), 
-    "mean": mean(data), 
-    "median": median(data), 
-    "spread": spread(data), 
-    "min": float(min(data)), 
-    "max": float(max(data)), 
-    } 
+def mode(data: Sequence[float]) -> List[float]:
+    """Мода ряда через Counter. При нескольких модах возвращает отсортированный список."""
+    _ensure_not_empty(data)
+    counts = Counter(data)
+    max_freq = max(counts.values())
+    return sorted(float(val) for val, freq in counts.items() if freq == max_freq)
+
+def summarize(data: Sequence[float]) -> Dict[str, Any]:
+    """Сводный отчёт: count, mean, median, spread, mode, min, max."""
+    _ensure_not_empty(data)
+    return {
+        "count": len(data),
+        "mean": mean(data),
+        "median": median(data),
+        "spread": spread(data),
+        "mode": mode(data),
+        "min": float(min(data)),
+        "max": float(max(data)),
+    }
+

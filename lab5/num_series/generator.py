@@ -55,3 +55,19 @@ def trend_series(n: int,
     start + step * i + (rng.uniform(-noise, noise) if noise else 0.0) 
     for i in range(n) 
     ] 
+
+def gauss_series(
+    n: int = 500, 
+    mu: float = 50.0, 
+    sigma: float = 10.0, 
+    seed: Optional[int] = None
+    ) -> List[float]:
+    
+    _validate_n(n)
+    if sigma < 0:
+        raise ValueError("sigma must be greater or equal 0")
+    
+    rng = random.Random(seed)
+    return [
+        rng.gauss(mu, sigma) for _ in range(n)
+    ]
