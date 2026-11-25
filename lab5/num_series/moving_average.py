@@ -2,13 +2,16 @@ import time
 from collections import deque 
 from typing import List, Sequence 
 
-def check_window(window:  int, n: int) -> None:
-    is_window_alr = window >= 1 and window <= n
+def check_window(window: int, n: int) -> None:
+    if isinstance(window, bool) or not isinstance(window, int):
+        raise ValueError("Размер окна должен быть целым числом")
+    if window < 1:
+        raise ValueError("Размер окна должен быть >= 1")
+    if window > n:
+        raise ValueError("Размер окна больше длины ряда")
+    
 
-    if not is_window_alr:
-        raise ValueError("smth wrng w/ window or n")
-
-def simple_moving_average(data: list[float], window) -> float:
+def simple_moving_average(data: list[float], window: int) -> float:
     n = len(data)
 
     check_window(window, n)
@@ -28,22 +31,43 @@ def simple_moving_average(data: list[float], window) -> float:
 
 
 def exponential_moving_average(
-        data: list[float], 
-        alpha: float
-        ) -> list[float]:
+    data: list[float], 
+    alpha: float
+) -> list[float]:
+    if not data:
+        raise ValueError("Ряд пуст: расчёт EMA невозможен")
 
-        if not data:
-            return []
+    if isinstance(alpha, bool) or not (0 < alpha <= 1):
+        raise ValueError("alpha must be in (0 ; 1]")
 
-        if not (0 < alpha <= 1):
-            raise ValueError("alpha must be in (0 ; 1]")
+    ema = [data[0]]
+    for i in range(1, len(data)):
+        ema.append(alpha * data[i] + (1 - alpha) * ema[i - 1])
 
-        ema = [data[0]]
+    return ema
 
-        for i in range(1, len(data)):
-            ema.append(alpha * data[i] + (1 - alpha) * ema[i - 1])
+def centered_moving_average(
+    data: Sequence[float],
+    window: int,
+) -> List[float]:
+    """Центрированное MA на базе list: окно нечётное, результат выровнен по центру."""
+    if not data:
+        raise ValueError("Ряд пуст: расчёт CMA невозможен")
+    check_window(window, len(data))
+    if window % 2 == 0:
+        raise ValueError(
+            f"Центрированное MA требует нечётного window, получено: {window}"
+        )
 
-        return ema
+    n = len(data)
+    running = sum(data[:window])
+    result: List[float] = [running / window]
+
+    for i in range(window, n):
+        running += data[i] - data[i - window]
+        result.append(running / window)
+
+    return result
 
 def simple_moving_average_deque(data: Sequence[float], window: int) -> List[float]: 
     """SMA с использованием deque (двусторонней очереди).""" 
@@ -54,10 +78,10 @@ def simple_moving_average_deque(data: Sequence[float], window: int) -> List[floa
     for x in data: 
         d.append(x) 
         running_sum += x 
-    if len(d) > window: 
-        running_sum -= d.popleft() 
-    if len(d) == window: 
-        result.append(running_sum / window) 
+        if len(d) > window: 
+            running_sum -= d.popleft() 
+        if len(d) == window: 
+            result.append(running_sum / window) 
     return result 
 
 def benchmark_moving_average(data: Sequence[float], window: int, repeats: int = 1000) -> dict: 

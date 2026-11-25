@@ -75,16 +75,10 @@ def centered_moving_average_deque(
     for x in data: 
         if len(buf) == window: 
             running -= buf[0] 
-    buf.append(x) 
-    running += x 
-    # Индекс «центра» окна в исходном ряду: 
-    # после append deque заполнен, len(buf) == window, центр = half 
-    # Если окно ещё не набрано — пропускаем. 
-    if len(buf) == window: 
-        result.append(running / window) 
-    # Центрированное MA короче исходного на (window - 1), т.е. len(result) == n - window + 1. 
-    # Внешне совпадает с простым SMA, но семантически «центр» совпадает 
-    # с индексом i = half в исходном ряду. Возвращаем как есть. 
+        buf.append(x) 
+        running += x 
+        if len(buf) == window: 
+            result.append(running / window) 
     return result 
 # --------------------------------------------------------------------------- 
 # Экспоненциальная скользящая средняя (EMA) через deque 
